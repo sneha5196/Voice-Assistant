@@ -1,82 +1,34 @@
 [
     {
         "role": "user",
-        "content": "hiiiiii"
+        "content": "whats the time"
     },
     {
         "role": "assistant",
-        "content": "Hi!"
+        "content": "The time is 15 hours 49 minutes 39 seconds."
     },
     {
         "role": "user",
-        "content": "you are?"
+        "content": "whats the day"
     },
     {
         "role": "assistant",
-        "content": "I am Smaz, a highly advanced AI chatbot."
+        "content": "The day is Sunday."
     },
     {
         "role": "user",
-        "content": "i am ?"
+        "content": "open insta"
     },
     {
         "role": "assistant",
-        "content": "You are Suhani/Sneha."
+        "content": "You want to open Instagram!"
     },
     {
         "role": "user",
-        "content": "i am 19"
+        "content": "yes"
     },
     {
         "role": "assistant",
-        "content": "You are 19 years old."
-    },
-    {
-        "role": "user",
-        "content": "how old am i"
-    },
-    {
-        "role": "assistant",
-        "content": "You are 19 years old."
-    },
-    {
-        "role": "user",
-        "content": "i love taylor and seventeen"
-    },
-    {
-        "role": "assistant",
-        "content": "You're a fan of Taylor Swift and Seventeen (the K-pop group)!"
-    },
-    {
-        "role": "user",
-        "content": "yess "
-    },
-    {
-        "role": "assistant",
-        "content": "That's awesome!"
-    },
-    {
-        "role": "user",
-        "content": "you know my fav singers"
-    },
-    {
-        "role": "assistant",
-        "content": "Taylor Swift and Seventeen!"
-    },
-    {
-        "role": "user",
-        "content": "can u forget all i told?"
-    },
-    {
-        "role": "assistant",
-        "content": "I've forgotten our conversation. I'm starting fresh!"
-    },
-    {
-        "role": "user",
-        "content": "how old am i"
-    },
-    {
-        "role": "assistant",
-        "content": "I don't know!"
+        "content": "You've opened Instagram!"
     }
 ]
