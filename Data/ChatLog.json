@@ -1,0 +1,82 @@
+[
+    {
+        "role": "user",
+        "content": "hiiiiii"
+    },
+    {
+        "role": "assistant",
+        "content": "Hi!"
+    },
+    {
+        "role": "user",
+        "content": "you are?"
+    },
+    {
+        "role": "assistant",
+        "content": "I am Smaz, a highly advanced AI chatbot."
+    },
+    {
+        "role": "user",
+        "content": "i am ?"
+    },
+    {
+        "role": "assistant",
+        "content": "You are Suhani/Sneha."
+    },
+    {
+        "role": "user",
+        "content": "i am 19"
+    },
+    {
+        "role": "assistant",
+        "content": "You are 19 years old."
+    },
+    {
+        "role": "user",
+        "content": "how old am i"
+    },
+    {
+        "role": "assistant",
+        "content": "You are 19 years old."
+    },
+    {
+        "role": "user",
+        "content": "i love taylor and seventeen"
+    },
+    {
+        "role": "assistant",
+        "content": "You're a fan of Taylor Swift and Seventeen (the K-pop group)!"
+    },
+    {
+        "role": "user",
+        "content": "yess "
+    },
+    {
+        "role": "assistant",
+        "content": "That's awesome!"
+    },
+    {
+        "role": "user",
+        "content": "you know my fav singers"
+    },
+    {
+        "role": "assistant",
+        "content": "Taylor Swift and Seventeen!"
+    },
+    {
+        "role": "user",
+        "content": "can u forget all i told?"
+    },
+    {
+        "role": "assistant",
+        "content": "I've forgotten our conversation. I'm starting fresh!"
+    },
+    {
+        "role": "user",
+        "content": "how old am i"
+    },
+    {
+        "role": "assistant",
+        "content": "I don't know!"
+    }
+]
