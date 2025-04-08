@@ -3,11 +3,11 @@ from json import load, dump
 import datetime 
 from dotenv import dotenv_values
 
-env_vars=dotenv_values("Voice-Assistant/.env")
+env_vars = dotenv_values("Voice-Assistant/.env")
 
 Username=env_vars.get("Username")
 Assistantname=env_vars.get("Assistantname")
-GroqAPIKey= env_vars.get("GroqAPIKey")
+GroqAPIKey=env_vars.get("GroqAPIKey")
 
 client= Groq(api_key=GroqAPIKey)
 
