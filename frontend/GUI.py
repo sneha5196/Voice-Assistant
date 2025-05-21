@@ -1,17 +1,28 @@
-from PyQt5.QtWidgets import QApplication, QLayout, QMainWindow, QTextEdit, QStackedWidget, QWidget, QLineEdit, QGridLayout, QVBoxLayout, QPushButton, QFrame, QLabel, QSizePolicy
-from PyQt5.QtGui import QIcon, QFont, QColor,QPainter,QPixmap,QMovie, QTextCharFormat, QFont, QPixmap, QTextBlockFormat
+from PyQt5.QtWidgets import QApplication, QLayout, QMainWindow, QTextEdit, QStackedWidget, QWidget, QLineEdit, QGridLayout, QVBoxLayout, QHBoxLayout, QPushButton, QFrame, QLabel, QSizePolicy
+from PyQt5.QtGui import QIcon, QFont, QColor ,QPainter,QPixmap,QMovie, QTextCharFormat, QFont, QPixmap, QTextBlockFormat
 from PyQt5.QtCore import Qt, QSize, QTimer
 from dotenv import dotenv_values
 import sys
 import os
+import time
+import json
 
-env_vars = dotenv_values('.env')
+def safe_read_file(path, retries=3, delay=0.2):
+    for attempt in range(retries):
+        try:
+            with open(path, "r", encoding='utf-8') as file:
+                return file.read()
+        except PermissionError:
+            print(f"[Warning] File is busy. Retrying in {delay} sec...")
+            time.sleep(delay)
+    return None
+
+env_vars = dotenv_values("Voice-Assistant/.env")
 Assistantname = env_vars.get("Assistantname")
 current_dir = os.getcwd()
-old_chat_message = ''
-
-TempDirPath = f"{current_dir}\\Voice-Assistant\\frontend\\Files"
-GraphicsDirPath = f"{current_dir}\\Voice-Assistant\\frontend\\Graphics"
+old_chat_message = ""
+TempDirPath = rf"{current_dir}\\Voice-Assistant\\frontend\\Files"
+GraphicsDirPath = rf"{current_dir}\\Voice-Assistant\\frontend\\Graphics"
 os.makedirs(TempDirPath, exist_ok=True)
 def AnswerModifier(Answer):
     lines = Answer.split('\n')
@@ -38,7 +49,7 @@ def QueryModifier(Query):
     return new_query.capitalize()
 
 def SetMicrophoneStatus(Command):
-    with open(f"{TempDirPath}\\Mic.data", "w", encoding="utf-8") as file:
+    with open(rf"{TempDirPath}\\Mic.data", "w", encoding="utf-8") as file:
         file.write(Command)
 def GetMicrophoneStatus():
     with open(rf"{TempDirPath}\\Mic.data", "r", encoding="utf-8") as file:
@@ -55,58 +66,57 @@ def GetAssistantStatus():
     return Status
 
 def MicButtonInitialed():
-    SetMicrophoneStatus("False")
-
-def MicButtonClosed():
     SetMicrophoneStatus("True")
 
+def MicButtonClosed():
+    SetMicrophoneStatus("False")
+
 def GraphicsDirectoryPath(Filename):
-    Path = rf"{GraphicsDirPath}\{Filename}"
+    Path = rf'{GraphicsDirPath}\{Filename}'
     return Path
 
 def TempDirectoryPath(Filename):
-    Path = rf"{TempDirPath}\{Filename}"
+    Path = rf'{TempDirPath}\{Filename}'
     return Path
 
 def ShowTextToScreen(Text):
-    with open(rf"{TempDirPath}\Responses.data", "w", encoding="utf-8") as file:
+    with open(rf'{TempDirPath}\Responses.data', "w", encoding="utf-8") as file:
         file.write(Text)
 class ChatSection(QWidget):
     def __init__(self):
         super(ChatSection, self).__init__()
         layout = QVBoxLayout(self)
         layout.setContentsMargins(-10, 40, 40, 100)
-        layout.setSpacing(-10)
-
+        layout.setSpacing(-100)
         self.chat_text_edit = QTextEdit()
         self.chat_text_edit.setReadOnly(True)
         self.chat_text_edit.setTextInteractionFlags(Qt.NoTextInteraction) # NO TEXT INTERACTION
         self.chat_text_edit.setFrameStyle(QFrame.NoFrame)
         layout.addWidget(self.chat_text_edit)
-        self.chat_text_edit.setStyleSheet("background-color: #190216")
-        layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.setStyleSheet("background-color: black;")
+        layout.setSizeConstraint(QVBoxLayout.SetDefaultConstraint)
         layout.setStretch(1, 1)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Policy.Expanding))
         text_color = QColor(Qt.blue)
         text_color_text = QTextCharFormat()
         text_color_text.setForeground(text_color)
         self.chat_text_edit.setCurrentCharFormat(text_color_text)
         self.gif_label = QLabel()
         self.gif_label.setStyleSheet("border: none;")
-        movie = QMovie(GraphicsDirectoryPath("JGIF"))
-        max_gif_size_w = 480
-        max_gif_size_h = 270
-        movie.setScaledSize(QSize(max_gif_size_w, max_gif_size_h))
+        movie = QMovie(GraphicsDirectoryPath("P.gif"))
+        max_gif_size_W = 480
+        max_gif_size_H = 270
+        movie.setScaledSize(QSize(max_gif_size_W, max_gif_size_H))
         self.gif_label.setAlignment(Qt.AlignRight | Qt.AlignBottom)
         self.gif_label.setMovie(movie)
         movie.start()
         layout.addWidget(self.gif_label)
+        self.toggled=True
         self.label = QLabel("")
         self.label.setStyleSheet("color: white; font-size: 16px; margin-right: 195px; border: none; margin-top: -30px;")
         self.label.setAlignment(Qt.AlignRight)
         layout.addWidget(self.label)
         layout.setSpacing(-10)
-        layout.addWidget(self.gif_label)
         font = QFont()
         font.setPointSize(13)
         self.chat_text_edit.setFont(font)
@@ -152,23 +162,39 @@ class ChatSection(QWidget):
     def loadMessages(self):
 
         global old_chat_message
+        path = TempDirectoryPath("Responses.data")
+        messages = safe_read_file(path)
 
-        with open(TempDirectoryPath('Responses.data'), "r", encoding='utf-8') as file:
-            messages = file.read()
+        if messages and len(messages) > 1 and str(messages) != str(old_chat_message):
+            self.addMessage(messages, "White")
+            old_chat_message = messages
+        # with open(TempDirectoryPath('Responses.data'), "r", encoding='utf-8') as file:
+        #     messages = file.read()
 
-            if None == messages:
-                pass
-            elif len(messages) <= 1:
-                pass
-            elif str(old_chat_message) == str(messages):
-                pass
-            else:
-                self.addMessage(messages=messages,color='White')
-                old_chat_message=messages
+        #     if None == messages:
+        #         pass
+        #     elif len(messages) <= 1:
+        #         pass
+        #     elif str(old_chat_message) == str(messages):
+        #         pass
+        #     else:
+        #         self.addMessage(messages, "White")
+        #         old_chat_message = messages
+    # def SpeechRecogText(self):
+    #     with open(TempDirectoryPath('Status.data'), "r", encoding='utf-8') as file:
+    #         messages = file.read()
+    #         self.label.setText(messages)
     def SpeechRecogText(self):
-        with open(TempDirectoryPath('Status.data'), "r", encoding='utf-8') as file:
-            messages = file.read()
-            self.label.setText(messages)
+        try:
+            with open(TempDirectoryPath('Status.data'), "r", encoding='utf-8') as file:
+                messages = file.read()
+                self.label.setText(messages)
+        except PermissionError:
+            self.label.setText("⚠️ Cannot read file: Permission denied.")
+        except FileNotFoundError:
+            self.label.setText("❌ Status file not found.")
+        except Exception as e:
+            self.label.setText(f"⚠️ Unexpected error: {e}")
 
     def load_icon(self, path, width=60, height=60):
         pixmap = QPixmap(path)
@@ -177,21 +203,21 @@ class ChatSection(QWidget):
 
     def toggle_icon(self, event=None):
         if self.toggled:
-            self.load_icon(GraphicsDirectoryPath("🎙️"),60,60)
+            self.load_icon(GraphicsDirectoryPath("voice.png"),60,60)
             MicButtonInitialed()
         else:
-            self.load_icon(GraphicsDirectoryPath("🎙️"), 60,60)
+            self.load_icon(GraphicsDirectoryPath("mic.png"), 60,60)
             MicButtonClosed()
         self.toggled = not self.toggled
     
     def addMessage(self, message, color):
         cursor = self.chat_text_edit.textCursor()
-        format =QTextBlockFormat()
-        format.setTopMargin(10)
-        format.setLeftMargin(10)
+        format =QTextCharFormat()
+        # format.setTopMargin(10)
+        # format.setLeftMargin(10)
         format.setForeground(QColor(color))
         cursor.setCharFormat(format)
-        cursor.setBlockFormat(format)
+        cursor.setCharFormat(format)
         cursor.insertText(message +"\n")
         self.chat_text_edit.setTextCursor(cursor)
 
@@ -213,8 +239,8 @@ class InitialScreen(QWidget):
         gif_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.icon_label = QLabel()
         icon_path = GraphicsDirectoryPath("Mic_on.png")
-        print("Icon Path:", icon_path)
-        print("Exists:", os.path.exists(icon_path))
+        # print("Icon Path:", icon_path)
+        # print("Exists:", os.path.exists(icon_path))
         pixmap = QPixmap(icon_path)
         new_pixmap = pixmap.scaled(60, 60)
         self.icon_label.setPixmap(new_pixmap)
@@ -238,10 +264,13 @@ class InitialScreen(QWidget):
         self.timer.start(5)
 
     def SpeechRecogText(self):
-        with open(TempDirectoryPath('Status.data'), "r", encoding='utf-8') as file:
-            messages = file.read()
-            self.label.setText(messages)
-
+        try:
+            with open(TempDirectoryPath('Status.data'), "r", encoding='utf-8') as file:
+                messages = file.read()
+                self.label.setText(messages)
+                return
+        except PermissionError:
+            time.sleep(0.2)
     def load_icon(self, path, width=60, height=60):
         pixmap = QPixmap(path)
         new_pixmap = pixmap.scaled(width, height)
@@ -254,6 +283,7 @@ class InitialScreen(QWidget):
         else:
             self.load_icon(GraphicsDirectoryPath('Mic_off.png'), 60, 60)
             MicButtonClosed()
+
         self.toggled = not self.toggled
 
 class MessageScreen(QWidget):
@@ -274,14 +304,15 @@ class MessageScreen(QWidget):
 class CustomTopBar(QWidget):
     def __init__(self, parent, stacked_widget):
         super().__init__(parent)
-        self.stacked_widget = stacked_widget
-        self.current_screen = None
         self.initUI()
+        self.current_screen = None
+        self.stacked_widget = stacked_widget
+        
 
     def initUI(self):
         self.setFixedHeight(50)
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignRight)
+        layout = QHBoxLayout(self)
+        layout.setAlignment(Qt.AlignLeft)
 
         home_button = QPushButton()
         home_icon = QIcon(GraphicsDirectoryPath("Home.png"))
@@ -302,9 +333,9 @@ class CustomTopBar(QWidget):
         minimize_button.clicked.connect(self.minimizeWindow)
 
         self.maximize_button = QPushButton()
-        maximize_icon = QIcon(GraphicsDirectoryPath('Maximize.png'))
+        self.maximize_icon = QIcon(GraphicsDirectoryPath('Maximize.png'))
         self.restore_icon = QIcon(GraphicsDirectoryPath('Minimize.png')) # Typo in image path, assuming 'Minimize.png' is intended for restore
-        self.maximize_button.setIcon(maximize_icon)
+        self.maximize_button.setIcon(self.maximize_icon)
         self.maximize_button.setFlat(True)
         self.maximize_button.setStyleSheet("background-color: white;")
         self.maximize_button.clicked.connect(self.maximizeWindow)
@@ -321,7 +352,7 @@ class CustomTopBar(QWidget):
         line_frame.setFrameShadow(QFrame.Sunken)
         line_frame.setStyleSheet("border-color: black;")
 
-        title_label = QLabel(f"{str('AssistantName').capitalize()} AI  ")
+        title_label = QLabel(f"{str(Assistantname).capitalize()} AI   ")
         title_label.setStyleSheet("color: black; font-size: 18px; background-color: white;")
 
         home_button.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(0))
@@ -336,7 +367,6 @@ class CustomTopBar(QWidget):
         layout.addWidget(self.maximize_button)
         layout.addWidget(close_button)
         layout.addWidget(line_frame)
-
         self.draggable = True
         self.offset = None
 
@@ -351,13 +381,19 @@ class CustomTopBar(QWidget):
     def maximizeWindow(self):
         if self.parent().isMaximized():
             self.parent().showNormal()
-            maximize_icon = QIcon(GraphicsDirectoryPath('Maximize.png'))
-            self.maximize_button.setIcon(maximize_icon)
+            self.maximize_button.setIcon(self.maximize_icon)
         else:
             self.parent().showMaximized()
             self.maximize_button.setIcon(self.restore_icon)
     def closeWindow(self):
+        try:
+            os.remove('Voice-Assistant/Data/ChatLog.json')
+        except FileNotFoundError:
+            pass
+    
+        
         self.parent().close()
+
 
     def mousePressEvent(self, event):
         if self.draggable:
@@ -383,14 +419,14 @@ class CustomTopBar(QWidget):
         initial_screen = InitialScreen(self)
         layout = self.parent().layout()
         if layout is not None:
-            layout.addWidget(initial_screen)
-        self.current_screen=initial_screen
+             layout.addWidget(initial_screen)
+        self.current_screen = initial_screen
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+       
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.initUI()
-
     def initUI(self):
         desktop = QApplication.desktop()
         screen_width = desktop.screenGeometry().width()
@@ -402,18 +438,49 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(message_screen)
         self.setGeometry(0, 0, screen_width, screen_height)
         self.setStyleSheet("background-color: black;")
-        top_bar = CustomTopBar(self, self.stacked_widget)
-        self.setMenuWidget(top_bar)
+        self.top_bar= CustomTopBar(self, self.stacked_widget)
+        # main_layout = QVBoxLayout()
+        # main_layout.setContentsMargins(0,0,0,0)
+        # main_layout.setSpacing(0)
+        # main_layout.addWidget(top_bar)
+        # main_layout.addWidget(self.stacked_widget)
+        self.setMenuWidget(self.top_bar)
         self.setCentralWidget(self.stacked_widget)
+    #  def __init__(self):
+    #     super().__init__()
+    #     self.setWindowTitle("Voice Assistant")
+    #     self.setGeometry(100, 100, 1280, 720)
+        
+    #     central_widget = QWidget()
+    #     self.setCentralWidget(central_widget)
+
+    #     layout = QVBoxLayout(central_widget)
+    #     layout.setContentsMargins(0, 0, 0, 0)
+    #     layout.setSpacing(0)
+
+    #     self.stacked_widget = QStackedWidget()
+    #     self.initial_screen = InitialScreen()
+    #     self.message_screen = MessageScreen()
+
+    #     self.stacked_widget.addWidget(self.initial_screen)
+    #     self.stacked_widget.addWidget(self.message_screen)
+
+    #     self.top_bar = CustomTopBar(self, self.stacked_widget)
+    #     layout.addWidget(self.top_bar)                # Add top bar at the top
+    #     layout.addWidget(self.stacked_widget)         # Then add the stacked widget below it
+
+    #     # Optional: show a default screen
+    #     self.stacked_widget.setCurrentWidget(self.initial_screen)
 
 def GraphicalUserInterface():
+   
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    GraphicalUserInterface()
+   GraphicalUserInterface()
     
 
 

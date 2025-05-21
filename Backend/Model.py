@@ -2,7 +2,7 @@ import cohere
 from rich import print
 from dotenv import dotenv_values
  
-env_vars = dotenv_values(".env")
+env_vars = dotenv_values("Voice-Assistant/.env")
 
 CohereAPIKey=env_vars.get("CohereAPIKey")
 # CohereAPIKey= "BGd9uPV51db18U6cBkcl3GfKcNH6iWUVPYJqjSgk" #env_vars.get("CohereAPIKey")
@@ -35,6 +35,7 @@ preamble = """You are a very accurate Decision-Making Model, which decides what 
 # -> Respond with 'youtube search (topic)' if a query is asking to search a specific topic on youtube but if the query is asking to search multiple topics on youtube, respond with 'youtube search 1st topic, youtube search 2nd topic' and so on.
 # *** If the query is asking to perform multiple tasks like 'open facebook, telegram and close whatsapp' respond with 'open facebook, open telegram, close whatsapp' ***
 # *** If the user is saying goodbye or wants to end the conversation like 'bye.' respond with 'exit'.***
+# *** ***
 # *** Respond with 'general (query)' if you can't decide the kind of query or if a query is asking to perform a task which is not mentioned above. """
 
 
